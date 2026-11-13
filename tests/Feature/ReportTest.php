@@ -1,0 +1,29 @@
+<?php
+
+use App\Models\Report;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+uses(RefreshDatabase::class);
+
+it('redirects guests from creating reports', function () {
+    $this->get('/reports/create')->assertRedirect(route('login'));
+});
+
+it('lets an authenticated user create a report linked to them', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->post('/reports', [
+        'type' => 'lost',
+        'category' => 'phone',
+        'title' => 'Lost phone',
+        'description' => 'Black phone',
+        'location' => 'Skopje',
+        'happened_at' => '2026-11-13',
+    ])->assertOk();
+
+    $report = Report::first();
+
+    expect($report->user_id)->toBe($user->id);
+    expect($report->title)->toBe('Lost phone');
+});

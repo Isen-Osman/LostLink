@@ -17,10 +17,11 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
-Route::view('/reports/create', 'reports.create')->name('reports.create');
+Route::middleware('auth')->group(function () {
+    Route::view('/reports/create', 'reports.create')->name('reports.create');
+    Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
+});
 
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
 Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
-
-Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
