@@ -8,10 +8,20 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $reports = Report::query()
+            ->when($request->filled('type'), fn ($query) => $query->where('type', $request->input('type')))
+            ->when($request->filled('category'), fn ($query) => $query->where('category', 'ilike', '%'.$request->input('category').'%'))
+            ->when($request->filled('location'), fn ($query) => $query->where('location', 'ilike', '%'.$request->input('location').'%'))
+            ->when($request->filled('happened_at'), fn ($query) => $query->whereDate('happened_at', $request->input('happened_at')))
+            ->latest()
+            ->orderByDesc('id')
+            ->paginate(10)
+            ->withQueryString();
+
         return view('reports.index', [
-            'reports' => Report::latest()->get(),
+            'reports' => $reports,
         ]);
     }
 
