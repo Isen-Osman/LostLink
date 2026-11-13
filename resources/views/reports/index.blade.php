@@ -46,7 +46,12 @@
 
             <div>
                 <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="category">Категорија</label>
-                <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30" id="category" name="category" type="text" value="{{ request('category') }}" placeholder="Пр. Телефон">
+                <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30" id="category" name="category">
+                    <option value="">Сите категории</option>
+                    @foreach (\App\Models\Report::CATEGORIES as $value => $label)
+                        <option value="{{ $value }}" @selected(request('category') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
             </div>
 
             <div>
@@ -94,7 +99,7 @@
                             <path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"></path>
                             <path d="M7 7h.01"></path>
                         </svg>
-                        <span>{{ $report->category }}</span>
+                        <span>{{ $report->categoryLabel() }}</span>
                     </div>
                     <div class="flex items-center gap-1.5">
                         <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

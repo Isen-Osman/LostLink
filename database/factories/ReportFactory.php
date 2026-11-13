@@ -21,7 +21,7 @@ class ReportFactory extends Factory
         return [
             'user_id' => User::factory(),
             'type' => fake()->randomElement(['lost', 'found']),
-            'category' => fake()->randomElement(['phone', 'wallet', 'keys', 'backpack', 'other']),
+            'category' => fake()->randomElement(array_keys(Report::CATEGORIES)),
             'title' => fake()->sentence(4),
             'description' => fake()->paragraph(),
             'location' => fake()->city(),

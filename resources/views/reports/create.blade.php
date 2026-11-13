@@ -39,7 +39,12 @@
 
                 <div>
                     <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="category">Категорија</label>
-                    <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30" id="category" name="category" type="text" value="{{ old('category') }}" placeholder="Пр. Телефон, Паричник...">
+                    <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30" id="category" name="category" required>
+                        <option value="" @selected(! old('category'))>— Избери категорија —</option>
+                        @foreach (\App\Models\Report::CATEGORIES as $value => $label)
+                            <option value="{{ $value }}" @selected(old('category') === $value)>{{ $label }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 

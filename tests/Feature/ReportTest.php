@@ -27,3 +27,18 @@ it('lets an authenticated user create a report linked to them', function () {
     expect($report->user_id)->toBe($user->id);
     expect($report->title)->toBe('Lost phone');
 });
+
+it('rejects a category that is not in the list', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->post('/reports', [
+        'type' => 'lost',
+        'category' => 'spaceship',
+        'title' => 'Lost phone',
+        'description' => 'Black phone',
+        'location' => 'Skopje',
+        'happened_at' => '2026-11-13',
+    ])->assertSessionHasErrors('category');
+
+    expect(Report::count())->toBe(0);
+});

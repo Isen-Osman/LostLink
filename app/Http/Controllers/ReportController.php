@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Report;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ReportController extends Controller
 {
@@ -12,7 +13,7 @@ class ReportController extends Controller
     {
         $reports = Report::query()
             ->when($request->filled('type'), fn ($query) => $query->where('type', $request->input('type')))
-            ->when($request->filled('category'), fn ($query) => $query->where('category', 'ilike', '%'.$request->input('category').'%'))
+            ->when($request->filled('category'), fn ($query) => $query->where('category', $request->input('category')))
             ->when($request->filled('location'), fn ($query) => $query->where('location', 'ilike', '%'.$request->input('location').'%'))
             ->when($request->filled('happened_at'), fn ($query) => $query->whereDate('happened_at', $request->input('happened_at')))
             ->latest()
@@ -36,7 +37,7 @@ class ReportController extends Controller
     {
         $validated = $request->validate([
             'type' => ['required', 'in:lost,found'],
-            'category' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'string', Rule::in(array_keys(Report::CATEGORIES))],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'location' => ['required', 'string', 'max:255'],

@@ -31,7 +31,7 @@
                     <dl class="mt-3 space-y-3 text-sm">
                         <div class="flex items-center justify-between gap-4">
                             <dt class="text-slate-500">Категорија</dt>
-                            <dd class="font-medium text-slate-900">{{ $report->category }}</dd>
+                            <dd class="font-medium text-slate-900">{{ $report->categoryLabel() }}</dd>
                         </div>
                         <div class="flex items-center justify-between gap-4">
                             <dt class="text-slate-500">Локација</dt>

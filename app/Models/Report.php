@@ -11,6 +11,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['user_id', 'type', 'category', 'title', 'description', 'location', 'happened_at', 'status'])]
 class Report extends Model
 {
+    public const CATEGORIES = [
+        'phone' => 'Телефон',
+        'wallet' => 'Паричник',
+        'keys' => 'Клучеви',
+        'backpack' => 'Ранец',
+        'documents' => 'Документи',
+        'electronics' => 'Електроника',
+        'jewelry' => 'Накит',
+        'clothing' => 'Облека',
+        'other' => 'Друго',
+    ];
+
     /** @use HasFactory<ReportFactory> */
     use HasFactory;
 
@@ -27,5 +39,10 @@ class Report extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function categoryLabel(): string
+    {
+        return self::CATEGORIES[$this->category] ?? $this->category;
     }
 }
