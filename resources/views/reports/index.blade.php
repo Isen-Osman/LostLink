@@ -83,6 +83,10 @@
     <div class="mt-4 grid gap-4 sm:grid-cols-2">
         @forelse ($reports as $report)
             <article class="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                @if ($report->image)
+                    <img class="mb-4 h-40 w-full rounded-xl object-cover" src="{{ $report->imageUrl() }}" alt="{{ $report->title }}" loading="lazy">
+                @endif
+
                 <div class="flex items-center justify-between gap-3">
                     <x-type-badge :type="$report->type" />
                     <time class="text-xs font-medium text-slate-500" datetime="{{ $report->happened_at->toDateString() }}">{{ $report->happened_at->format('d.m.Y') }}</time>

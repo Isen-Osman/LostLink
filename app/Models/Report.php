@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'type', 'category', 'title', 'description', 'location', 'happened_at', 'status'])]
+#[Fillable(['user_id', 'type', 'category', 'title', 'description', 'image', 'location', 'happened_at', 'status'])]
 class Report extends Model
 {
     public const CATEGORIES = [
@@ -44,5 +44,10 @@ class Report extends Model
     public function categoryLabel(): string
     {
         return self::CATEGORIES[$this->category] ?? $this->category;
+    }
+
+    public function imageUrl(): ?string
+    {
+        return $this->image ? asset('storage/'.$this->image) : null;
     }
 }

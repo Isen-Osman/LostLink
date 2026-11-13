@@ -40,9 +40,14 @@ class ReportController extends Controller
             'category' => ['required', 'string', Rule::in(array_keys(Report::CATEGORIES))],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
+            'image' => ['nullable', 'image', 'max:2048'],
             'location' => ['required', 'string', 'max:255'],
             'happened_at' => ['required', 'date'],
         ]);
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('reports', 'public');
+        }
 
         $report = $request->user()->reports()->create($validated);
 

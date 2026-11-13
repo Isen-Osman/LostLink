@@ -19,6 +19,12 @@
             <h1 class="mt-3 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $report->title }}</h1>
         </div>
 
+        @if ($report->image)
+            <div class="border-b border-slate-100 p-5 sm:p-8">
+                <img class="max-h-[28rem] w-full rounded-xl object-cover" src="{{ $report->imageUrl() }}" alt="{{ $report->title }}">
+            </div>
+        @endif
+
         <div class="grid gap-8 p-5 sm:p-8 lg:grid-cols-3">
             <div class="lg:col-span-2">
                 <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Опис</h2>
