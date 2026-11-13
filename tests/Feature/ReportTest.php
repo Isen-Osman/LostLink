@@ -64,3 +64,12 @@ it('stores an uploaded image', function () {
     expect($report->image)->not->toBeNull();
     Storage::disk('public')->assertExists($report->image);
 });
+
+it('shows the author phone number on the report page', function () {
+    $user = User::factory()->create(['phone' => '+389 70 123 456']);
+    $report = Report::factory()->for($user)->create();
+
+    $this->get(route('reports.show', $report))
+        ->assertOk()
+        ->assertSee('+389 70 123 456');
+});
