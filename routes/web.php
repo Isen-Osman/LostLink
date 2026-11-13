@@ -1,11 +1,21 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [AuthController::class, 'create'])->name('register');
+    Route::post('/register', [AuthController::class, 'store'])->name('register.store');
+    Route::get('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'authenticate'])->name('login.store');
+});
+
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
 Route::view('/reports/create', 'reports.create')->name('reports.create');
 
