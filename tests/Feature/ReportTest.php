@@ -73,3 +73,48 @@ it('shows the author phone number on the report page', function () {
         ->assertOk()
         ->assertSee('+389 70 123 456');
 });
+
+it('lets the owner update a report', function () {
+    $user = User::factory()->create();
+    $report = Report::factory()->for($user)->create();
+
+    $this->actingAs($user)->get(route('reports.edit', $report))->assertOk();
+
+    $this->actingAs($user)->put(route('reports.update', $report), [
+        'type' => 'found',
+        'category' => 'wallet',
+        'title' => 'Updated title',
+        'description' => 'Updated description',
+        'location' => 'Bitola',
+        'happened_at' => '2026-11-13',
+    ])->assertRedirect(route('reports.show', $report));
+
+    $report->refresh();
+
+    expect($report->type)->toBe('found');
+    expect($report->title)->toBe('Updated title');
+    expect($report->location)->toBe('Bitola');
+});
+
+it('forbids editing or deleting someone else\'s report', function () {
+    $owner = User::factory()->create();
+    $report = Report::factory()->for($owner)->create();
+    $other = User::factory()->create();
+
+    $this->actingAs($other)->get(route('reports.edit', $report))->assertForbidden();
+    $this->actingAs($other)->put(route('reports.update', $report), [])->assertForbidden();
+    $this->actingAs($other)->delete(route('reports.destroy', $report))->assertForbidden();
+
+    expect(Report::find($report->id))->not->toBeNull();
+});
+
+it('lets the owner delete a report', function () {
+    $user = User::factory()->create();
+    $report = Report::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->delete(route('reports.destroy', $report))
+        ->assertRedirect(route('reports.index'));
+
+    expect(Report::find($report->id))->toBeNull();
+});
