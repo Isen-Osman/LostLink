@@ -16,6 +16,7 @@
             <p>Категорија: {{ $report->category }}</p>
             <p>Локација: {{ $report->location }}</p>
             <p>Датум: {{ $report->happened_at->format('d.m.Y') }}</p>
+            <p><a href="{{ route('reports.show', $report) }}">Детали</a></p>
         </article>
     @empty
         <p>Сè уште нема пријави.</p>

@@ -15,6 +15,13 @@ class ReportController extends Controller
         ]);
     }
 
+    public function show(Report $report): View
+    {
+        return view('reports.show', [
+            'report' => $report,
+        ]);
+    }
+
     public function store(Request $request): View
     {
         $validated = $request->validate([
