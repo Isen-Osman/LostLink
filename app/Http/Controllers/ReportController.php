@@ -43,7 +43,7 @@ class ReportController extends Controller
             'happened_at' => ['required', 'date'],
         ]);
 
-        $report = Report::create($validated);
+        $report = $request->user()->reports()->create($validated);
 
         return view('reports.received', [
             'report' => $report,
