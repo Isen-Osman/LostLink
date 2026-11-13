@@ -19,6 +19,12 @@
             <h1 class="mt-3 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $report->title }}</h1>
         </div>
 
+        @if ($report->image)
+            <div class="border-b border-slate-100 p-5 sm:p-8">
+                <img class="max-h-[28rem] w-full rounded-xl object-cover" src="{{ $report->imageUrl() }}" alt="{{ $report->title }}">
+            </div>
+        @endif
+
         <div class="grid gap-8 p-5 sm:p-8 lg:grid-cols-3">
             <div class="lg:col-span-2">
                 <h2 class="text-xs font-semibold uppercase tracking-wide text-slate-500">Опис</h2>
@@ -31,7 +37,7 @@
                     <dl class="mt-3 space-y-3 text-sm">
                         <div class="flex items-center justify-between gap-4">
                             <dt class="text-slate-500">Категорија</dt>
-                            <dd class="font-medium text-slate-900">{{ $report->category }}</dd>
+                            <dd class="font-medium text-slate-900">{{ $report->categoryLabel() }}</dd>
                         </div>
                         <div class="flex items-center justify-between gap-4">
                             <dt class="text-slate-500">Локација</dt>
@@ -56,6 +62,14 @@
                         </span>
                         <span class="font-medium text-slate-900">{{ $report->user?->name ?? 'Непознат автор' }}</span>
                     </div>
+                    @if ($report->user?->phone)
+                        <a href="tel:{{ $report->user->phone }}" class="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-sky-700 transition hover:text-sky-800">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            {{ $report->user->phone }}
+                        </a>
+                    @endif
                 </div>
             </aside>
         </div>
