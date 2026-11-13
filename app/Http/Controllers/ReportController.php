@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class ReportController extends Controller
@@ -35,15 +37,7 @@ class ReportController extends Controller
 
     public function store(Request $request): View
     {
-        $validated = $request->validate([
-            'type' => ['required', 'in:lost,found'],
-            'category' => ['required', 'string', Rule::in(array_keys(Report::CATEGORIES))],
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'image' => ['nullable', 'image', 'max:2048'],
-            'location' => ['required', 'string', 'max:255'],
-            'happened_at' => ['required', 'date'],
-        ]);
+        $validated = $request->validate($this->rules());
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('reports', 'public');
@@ -54,5 +48,66 @@ class ReportController extends Controller
         return view('reports.received', [
             'report' => $report,
         ]);
+    }
+
+    public function edit(Request $request, Report $report): View
+    {
+        abort_unless($report->user_id === $request->user()->id, 403);
+
+        return view('reports.edit', [
+            'report' => $report,
+        ]);
+    }
+
+    public function update(Request $request, Report $report): RedirectResponse
+    {
+        abort_unless($report->user_id === $request->user()->id, 403);
+
+        $validated = $request->validate($this->rules());
+
+        if ($request->hasFile('image')) {
+            if ($report->image) {
+                Storage::disk('public')->delete($report->image);
+            }
+
+            $validated['image'] = $request->file('image')->store('reports', 'public');
+        }
+
+        $report->update($validated);
+
+        return redirect()
+            ->route('reports.show', $report)
+            ->with('status', 'Пријавата е успешно изменета.');
+    }
+
+    public function destroy(Request $request, Report $report): RedirectResponse
+    {
+        abort_unless($report->user_id === $request->user()->id, 403);
+
+        if ($report->image) {
+            Storage::disk('public')->delete($report->image);
+        }
+
+        $report->delete();
+
+        return redirect()
+            ->route('reports.index')
+            ->with('status', 'Пријавата е избришана.');
+    }
+
+    /**
+     * @return array<string, array<int, mixed>>
+     */
+    private function rules(): array
+    {
+        return [
+            'type' => ['required', 'in:lost,found'],
+            'category' => ['required', 'string', Rule::in(array_keys(Report::CATEGORIES))],
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'image' => ['nullable', 'image', 'max:2048'],
+            'location' => ['required', 'string', 'max:255'],
+            'happened_at' => ['required', 'date'],
+        ];
     }
 }

@@ -3,12 +3,40 @@
 @section('title', $report->title.' | LostLink')
 
 @section('content')
-    <a href="{{ route('reports.index') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition hover:text-slate-900">
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M19 12H5M11 18l-6-6 6-6"></path>
-        </svg>
-        Назад до пријавите
-    </a>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <a href="{{ route('reports.index') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition hover:text-slate-900">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5M11 18l-6-6 6-6"></path>
+            </svg>
+            Назад до пријавите
+        </a>
+
+        @auth
+            @if (auth()->id() === $report->user_id)
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('reports.edit', $report) }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+                        </svg>
+                        Уреди
+                    </a>
+                    <form action="{{ route('reports.destroy', $report) }}" method="POST" onsubmit="return confirm('Дали сигурно сакаш да ја избришеш оваа пријава?');">
+                        @csrf
+                        @method('DELETE')
+                        <button class="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-sm font-semibold text-rose-700 shadow-sm transition hover:bg-rose-50" type="submit">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 6h18"></path>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            Избриши
+                        </button>
+                    </form>
+                </div>
+            @endif
+        @endauth
+    </div>
 
     <article class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div class="border-b border-slate-100 p-5 sm:p-8">
@@ -16,6 +44,7 @@
                 <x-type-badge :type="$report->type" />
                 <span class="text-sm text-slate-500">Објавено на {{ $report->created_at->format('d.m.Y') }}</span>
             </div>
+
             <h1 class="mt-3 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{{ $report->title }}</h1>
         </div>
 
