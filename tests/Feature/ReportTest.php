@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ReportStatus;
 use App\Enums\ReportType;
 use App\Models\Report;
 use App\Models\User;
@@ -118,4 +119,33 @@ it('lets the owner delete a report', function () {
         ->assertRedirect(route('reports.index'));
 
     expect(Report::find($report->id))->toBeNull();
+});
+
+it('lets the owner resolve and reopen a report', function () {
+    $user = User::factory()->create();
+    $report = Report::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->patch(route('reports.resolve', $report))
+        ->assertRedirect(route('reports.show', $report));
+
+    expect($report->refresh()->status)->toBe(ReportStatus::Resolved);
+
+    $this->actingAs($user)
+        ->patch(route('reports.resolve', $report))
+        ->assertRedirect(route('reports.show', $report));
+
+    expect($report->refresh()->status)->toBe(ReportStatus::Open);
+});
+
+it('forbids others from changing report status', function () {
+    $owner = User::factory()->create();
+    $report = Report::factory()->for($owner)->create();
+    $other = User::factory()->create();
+
+    $this->actingAs($other)
+        ->patch(route('reports.resolve', $report))
+        ->assertForbidden();
+
+    expect($report->refresh()->status)->toBe(ReportStatus::Open);
 });

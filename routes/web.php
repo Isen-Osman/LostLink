@@ -20,6 +20,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
     Route::get('/reports/{report}/edit', [ReportController::class, 'edit'])->name('reports.edit');
     Route::put('/reports/{report}', [ReportController::class, 'update'])->name('reports.update');
+    Route::patch('/reports/{report}/resolve', [ReportController::class, 'resolve'])->name('reports.resolve');
     Route::delete('/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
 });
 

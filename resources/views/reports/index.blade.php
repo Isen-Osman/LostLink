@@ -83,13 +83,24 @@
 
     <div class="mt-4 grid gap-4 sm:grid-cols-2">
         @forelse ($reports as $report)
-            <article class="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+            @php($resolved = $report->status === \App\Enums\ReportStatus::Resolved)
+            <article class="group flex flex-col rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md {{ $resolved ? 'border-slate-300 bg-slate-100' : 'border-slate-200 bg-white' }}">
                 @if ($report->image)
                     <img class="mb-4 h-40 w-full rounded-xl object-cover" src="{{ $report->imageUrl() }}" alt="{{ $report->title }}" loading="lazy">
                 @endif
 
                 <div class="flex items-center justify-between gap-3">
-                    <x-type-badge :type="$report->type" />
+                    <div class="flex items-center gap-2">
+                        <x-type-badge :type="$report->type" />
+                        @if ($resolved)
+                            <span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M20 6 9 17l-5-5"></path>
+                                </svg>
+                                Решена
+                            </span>
+                        @endif
+                    </div>
                     <time class="text-xs font-medium text-slate-500" datetime="{{ $report->happened_at->toDateString() }}">{{ $report->happened_at->format('d.m.Y') }}</time>
                 </div>
 

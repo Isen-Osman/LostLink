@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ReportCategory;
+use App\Enums\ReportStatus;
 use App\Enums\ReportType;
 use App\Models\Report;
 use Illuminate\Contracts\View\View;
@@ -80,6 +81,21 @@ class ReportController extends Controller
         return redirect()
             ->route('reports.show', $report)
             ->with('status', 'Пријавата е успешно изменета.');
+    }
+
+    public function resolve(Request $request, Report $report): RedirectResponse
+    {
+        abort_unless($report->user_id === $request->user()->id, 403);
+
+        $report->status = $report->status === ReportStatus::Resolved
+            ? ReportStatus::Open
+            : ReportStatus::Resolved;
+
+        $report->save();
+
+        return redirect()
+            ->route('reports.show', $report)
+            ->with('status', 'Статусот на пријавата е променет.');
     }
 
     public function destroy(Request $request, Report $report): RedirectResponse
