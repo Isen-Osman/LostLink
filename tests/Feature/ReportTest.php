@@ -149,3 +149,19 @@ it('forbids others from changing report status', function () {
 
     expect($report->refresh()->status)->toBe(ReportStatus::Open);
 });
+
+it('shows only the authenticated user\'s reports on the my reports page', function () {
+    $user = User::factory()->create();
+    Report::factory()->for($user)->create(['title' => 'My own report']);
+    Report::factory()->create(['title' => 'Someone else report']);
+
+    $this->actingAs($user)
+        ->get(route('reports.mine'))
+        ->assertOk()
+        ->assertSee('My own report')
+        ->assertDontSee('Someone else report');
+});
+
+it('redirects guests from the my reports page', function () {
+    $this->get(route('reports.mine'))->assertRedirect(route('login'));
+});

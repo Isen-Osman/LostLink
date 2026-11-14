@@ -31,6 +31,15 @@ class ReportController extends Controller
         ]);
     }
 
+    public function mine(Request $request): View
+    {
+        $reports = $request->user()->reports()->latest()->paginate(10);
+
+        return view('reports.mine', [
+            'reports' => $reports,
+        ]);
+    }
+
     public function show(Report $report): View
     {
         return view('reports.show', [
