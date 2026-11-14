@@ -53,9 +53,9 @@ class ReportController extends Controller
         ]);
     }
 
-    public function edit(Request $request, Report $report): View
+    public function edit(Report $report): View
     {
-        abort_unless($report->user_id === $request->user()->id, 403);
+        $this->authorize('update', $report);
 
         return view('reports.edit', [
             'report' => $report,
@@ -64,7 +64,7 @@ class ReportController extends Controller
 
     public function update(Request $request, Report $report): RedirectResponse
     {
-        abort_unless($report->user_id === $request->user()->id, 403);
+        $this->authorize('update', $report);
 
         $validated = $request->validate($this->rules());
 
@@ -83,9 +83,9 @@ class ReportController extends Controller
             ->with('status', 'Пријавата е успешно изменета.');
     }
 
-    public function resolve(Request $request, Report $report): RedirectResponse
+    public function resolve(Report $report): RedirectResponse
     {
-        abort_unless($report->user_id === $request->user()->id, 403);
+        $this->authorize('update', $report);
 
         $report->status = $report->status === ReportStatus::Resolved
             ? ReportStatus::Open
@@ -98,9 +98,9 @@ class ReportController extends Controller
             ->with('status', 'Статусот на пријавата е променет.');
     }
 
-    public function destroy(Request $request, Report $report): RedirectResponse
+    public function destroy(Report $report): RedirectResponse
     {
-        abort_unless($report->user_id === $request->user()->id, 403);
+        $this->authorize('delete', $report);
 
         if ($report->image) {
             Storage::disk('public')->delete($report->image);
