@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ReportCategory;
 use App\Enums\ReportStatus;
-use App\Enums\ReportType;
+use App\Http\Requests\StoreReportRequest;
+use App\Http\Requests\UpdateReportRequest;
 use App\Models\Report;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 
 class ReportController extends Controller
 {
@@ -47,9 +46,9 @@ class ReportController extends Controller
         ]);
     }
 
-    public function store(Request $request): View
+    public function store(StoreReportRequest $request): View
     {
-        $validated = $request->validate($this->rules());
+        $validated = $request->validated();
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('reports', 'public');
@@ -71,11 +70,9 @@ class ReportController extends Controller
         ]);
     }
 
-    public function update(Request $request, Report $report): RedirectResponse
+    public function update(UpdateReportRequest $request, Report $report): RedirectResponse
     {
-        $this->authorize('update', $report);
-
-        $validated = $request->validate($this->rules());
+        $validated = $request->validated();
 
         if ($request->hasFile('image')) {
             if ($report->image) {
@@ -120,21 +117,5 @@ class ReportController extends Controller
         return redirect()
             ->route('reports.index')
             ->with('status', 'Пријавата е избришана.');
-    }
-
-    /**
-     * @return array<string, array<int, mixed>>
-     */
-    private function rules(): array
-    {
-        return [
-            'type' => ['required', Rule::enum(ReportType::class)],
-            'category' => ['required', Rule::enum(ReportCategory::class)],
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'image' => ['nullable', 'image', 'max:2048'],
-            'location' => ['required', 'string', 'max:255'],
-            'happened_at' => ['required', 'date'],
-        ];
     }
 }
