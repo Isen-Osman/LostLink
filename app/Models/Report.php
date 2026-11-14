@@ -17,6 +17,10 @@ class Report extends Model
     /** @use HasFactory<ReportFactory> */
     use HasFactory;
 
+    protected $attributes = [
+        'status' => 'open',
+    ];
+
     /**
      * @return array<string, string>
      */

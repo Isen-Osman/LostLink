@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreReportRequest;
+use App\Http\Requests\UpdateReportRequest;
 use App\Http\Resources\ReportResource;
 use App\Models\Report;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
@@ -29,5 +33,50 @@ class ReportController extends Controller
     public function show(Report $report): ReportResource
     {
         return new ReportResource($report->load('user'));
+    }
+
+    public function store(StoreReportRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('reports', 'public');
+        }
+
+        $report = $request->user()->reports()->create($validated);
+
+        return (new ReportResource($report->load('user')))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    public function update(UpdateReportRequest $request, Report $report): ReportResource
+    {
+        $validated = $request->validated();
+
+        if ($request->hasFile('image')) {
+            if ($report->image) {
+                Storage::disk('public')->delete($report->image);
+            }
+
+            $validated['image'] = $request->file('image')->store('reports', 'public');
+        }
+
+        $report->update($validated);
+
+        return new ReportResource($report->load('user'));
+    }
+
+    public function destroy(Report $report): JsonResponse
+    {
+        $this->authorize('delete', $report);
+
+        if ($report->image) {
+            Storage::disk('public')->delete($report->image);
+        }
+
+        $report->delete();
+
+        return response()->json(null, 204);
     }
 }
