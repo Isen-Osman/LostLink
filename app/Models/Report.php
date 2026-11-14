@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\ReportCategory;
+use App\Enums\ReportStatus;
+use App\Enums\ReportType;
 use Database\Factories\ReportFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,18 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable(['user_id', 'type', 'category', 'title', 'description', 'image', 'location', 'happened_at', 'status'])]
 class Report extends Model
 {
-    public const CATEGORIES = [
-        'phone' => 'Телефон',
-        'wallet' => 'Паричник',
-        'keys' => 'Клучеви',
-        'backpack' => 'Ранец',
-        'documents' => 'Документи',
-        'electronics' => 'Електроника',
-        'jewelry' => 'Накит',
-        'clothing' => 'Облека',
-        'other' => 'Друго',
-    ];
-
     /** @use HasFactory<ReportFactory> */
     use HasFactory;
 
@@ -33,6 +24,9 @@ class Report extends Model
     {
         return [
             'happened_at' => 'date',
+            'type' => ReportType::class,
+            'category' => ReportCategory::class,
+            'status' => ReportStatus::class,
         ];
     }
 
@@ -43,7 +37,7 @@ class Report extends Model
 
     public function categoryLabel(): string
     {
-        return self::CATEGORIES[$this->category] ?? $this->category;
+        return $this->category->label();
     }
 
     public function imageUrl(): ?string

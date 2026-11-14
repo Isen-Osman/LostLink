@@ -78,7 +78,7 @@
                         </div>
                         <div class="flex items-center justify-between gap-4">
                             <dt class="text-slate-500">Статус</dt>
-                            <dd class="font-medium text-slate-900">{{ $report->status === 'resolved' ? 'Решена' : 'Отворена' }}</dd>
+                            <dd class="font-medium text-slate-900">{{ $report->status->label() }}</dd>
                         </div>
                     </dl>
                 </div>

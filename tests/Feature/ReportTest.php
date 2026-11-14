@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ReportType;
 use App\Models\Report;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -91,7 +92,7 @@ it('lets the owner update a report', function () {
 
     $report->refresh();
 
-    expect($report->type)->toBe('found');
+    expect($report->type)->toBe(ReportType::Found);
     expect($report->title)->toBe('Updated title');
     expect($report->location)->toBe('Bitola');
 });

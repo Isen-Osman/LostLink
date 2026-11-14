@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ReportCategory;
+use App\Enums\ReportType;
 use App\Models\Report;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -101,8 +103,8 @@ class ReportController extends Controller
     private function rules(): array
     {
         return [
-            'type' => ['required', 'in:lost,found'],
-            'category' => ['required', 'string', Rule::in(array_keys(Report::CATEGORIES))],
+            'type' => ['required', Rule::enum(ReportType::class)],
+            'category' => ['required', Rule::enum(ReportCategory::class)],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'image' => ['nullable', 'image', 'max:2048'],

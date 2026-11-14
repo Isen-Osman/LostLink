@@ -39,8 +39,9 @@
                 <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="type">Тип</label>
                 <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30" id="type" name="type">
                     <option value="">Сите</option>
-                    <option value="lost" @selected(request('type') === 'lost')>Изгубен</option>
-                    <option value="found" @selected(request('type') === 'found')>Најден</option>
+                    @foreach (\App\Enums\ReportType::cases() as $type)
+                        <option value="{{ $type->value }}" @selected(request('type') === $type->value)>{{ $type->label() }}</option>
+                    @endforeach
                 </select>
             </div>
 
@@ -48,8 +49,8 @@
                 <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="category">Категорија</label>
                 <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30" id="category" name="category">
                     <option value="">Сите категории</option>
-                    @foreach (\App\Models\Report::CATEGORIES as $value => $label)
-                        <option value="{{ $value }}" @selected(request('category') === $value)>{{ $label }}</option>
+                    @foreach (\App\Enums\ReportCategory::cases() as $category)
+                        <option value="{{ $category->value }}" @selected(request('category') === $category->value)>{{ $category->label() }}</option>
                     @endforeach
                 </select>
             </div>
