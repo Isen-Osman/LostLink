@@ -42,6 +42,38 @@ it('forbids updating another user\'s report', function () {
     ])->assertForbidden();
 });
 
+it('lists reports with pagination', function () {
+    Report::factory()->count(2)->create();
+
+    $this->getJson('/api/reports')
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJsonStructure(['data', 'links', 'meta']);
+});
+
+it('shows a single report', function () {
+    $report = Report::factory()->create();
+
+    $this->getJson("/api/reports/{$report->id}")
+        ->assertOk()
+        ->assertJsonPath('data.id', $report->id);
+});
+
+it('returns 404 for a missing report', function () {
+    $this->getJson('/api/reports/999999')->assertNotFound();
+});
+
+it('validates report data', function () {
+    Sanctum::actingAs(User::factory()->create());
+
+    $this->postJson('/api/reports', [
+        'type' => 'unknown',
+        'category' => 'phone',
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['type', 'title', 'description', 'location', 'happened_at']);
+});
+
 it('lets the owner update and delete a report', function () {
     $user = User::factory()->create();
     $report = Report::factory()->for($user)->create();
