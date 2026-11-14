@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\ReportStatus;
+use App\Enums\ReportType;
 use App\Models\Report;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -91,7 +93,7 @@ it('lets the owner update a report', function () {
 
     $report->refresh();
 
-    expect($report->type)->toBe('found');
+    expect($report->type)->toBe(ReportType::Found);
     expect($report->title)->toBe('Updated title');
     expect($report->location)->toBe('Bitola');
 });
@@ -117,4 +119,49 @@ it('lets the owner delete a report', function () {
         ->assertRedirect(route('reports.index'));
 
     expect(Report::find($report->id))->toBeNull();
+});
+
+it('lets the owner resolve and reopen a report', function () {
+    $user = User::factory()->create();
+    $report = Report::factory()->for($user)->create();
+
+    $this->actingAs($user)
+        ->patch(route('reports.resolve', $report))
+        ->assertRedirect(route('reports.show', $report));
+
+    expect($report->refresh()->status)->toBe(ReportStatus::Resolved);
+
+    $this->actingAs($user)
+        ->patch(route('reports.resolve', $report))
+        ->assertRedirect(route('reports.show', $report));
+
+    expect($report->refresh()->status)->toBe(ReportStatus::Open);
+});
+
+it('forbids others from changing report status', function () {
+    $owner = User::factory()->create();
+    $report = Report::factory()->for($owner)->create();
+    $other = User::factory()->create();
+
+    $this->actingAs($other)
+        ->patch(route('reports.resolve', $report))
+        ->assertForbidden();
+
+    expect($report->refresh()->status)->toBe(ReportStatus::Open);
+});
+
+it('shows only the authenticated user\'s reports on the my reports page', function () {
+    $user = User::factory()->create();
+    Report::factory()->for($user)->create(['title' => 'My own report']);
+    Report::factory()->create(['title' => 'Someone else report']);
+
+    $this->actingAs($user)
+        ->get(route('reports.mine'))
+        ->assertOk()
+        ->assertSee('My own report')
+        ->assertDontSee('Someone else report');
+});
+
+it('redirects guests from the my reports page', function () {
+    $this->get(route('reports.mine'))->assertRedirect(route('login'));
 });

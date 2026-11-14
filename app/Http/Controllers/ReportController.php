@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ReportCategory;
+use App\Enums\ReportStatus;
+use App\Enums\ReportType;
 use App\Models\Report;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -28,6 +31,15 @@ class ReportController extends Controller
         ]);
     }
 
+    public function mine(Request $request): View
+    {
+        $reports = $request->user()->reports()->latest()->paginate(10);
+
+        return view('reports.mine', [
+            'reports' => $reports,
+        ]);
+    }
+
     public function show(Report $report): View
     {
         return view('reports.show', [
@@ -50,9 +62,9 @@ class ReportController extends Controller
         ]);
     }
 
-    public function edit(Request $request, Report $report): View
+    public function edit(Report $report): View
     {
-        abort_unless($report->user_id === $request->user()->id, 403);
+        $this->authorize('update', $report);
 
         return view('reports.edit', [
             'report' => $report,
@@ -61,7 +73,7 @@ class ReportController extends Controller
 
     public function update(Request $request, Report $report): RedirectResponse
     {
-        abort_unless($report->user_id === $request->user()->id, 403);
+        $this->authorize('update', $report);
 
         $validated = $request->validate($this->rules());
 
@@ -80,9 +92,24 @@ class ReportController extends Controller
             ->with('status', 'Пријавата е успешно изменета.');
     }
 
-    public function destroy(Request $request, Report $report): RedirectResponse
+    public function resolve(Report $report): RedirectResponse
     {
-        abort_unless($report->user_id === $request->user()->id, 403);
+        $this->authorize('update', $report);
+
+        $report->status = $report->status === ReportStatus::Resolved
+            ? ReportStatus::Open
+            : ReportStatus::Resolved;
+
+        $report->save();
+
+        return redirect()
+            ->route('reports.show', $report)
+            ->with('status', 'Статусот на пријавата е променет.');
+    }
+
+    public function destroy(Report $report): RedirectResponse
+    {
+        $this->authorize('delete', $report);
 
         if ($report->image) {
             Storage::disk('public')->delete($report->image);
@@ -101,8 +128,8 @@ class ReportController extends Controller
     private function rules(): array
     {
         return [
-            'type' => ['required', 'in:lost,found'],
-            'category' => ['required', 'string', Rule::in(array_keys(Report::CATEGORIES))],
+            'type' => ['required', Rule::enum(ReportType::class)],
+            'category' => ['required', Rule::enum(ReportCategory::class)],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'image' => ['nullable', 'image', 'max:2048'],

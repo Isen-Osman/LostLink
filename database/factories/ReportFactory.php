@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\ReportCategory;
+use App\Enums\ReportStatus;
+use App\Enums\ReportType;
 use App\Models\Report;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,13 +23,13 @@ class ReportFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'type' => fake()->randomElement(['lost', 'found']),
-            'category' => fake()->randomElement(array_keys(Report::CATEGORIES)),
+            'type' => fake()->randomElement(ReportType::cases()),
+            'category' => fake()->randomElement(ReportCategory::cases()),
             'title' => fake()->sentence(4),
             'description' => fake()->paragraph(),
             'location' => fake()->city(),
             'happened_at' => fake()->dateTimeBetween('-1 month'),
-            'status' => 'open',
+            'status' => ReportStatus::Open,
         ];
     }
 }

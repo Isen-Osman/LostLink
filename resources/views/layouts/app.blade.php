@@ -22,6 +22,7 @@
 
                 <div class="flex items-center gap-3">
                     @auth
+                        <a href="{{ route('reports.mine') }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Мои пријави</a>
                         <a href="{{ route('reports.create') }}" class="inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
                                 <path d="M12 5v14M5 12h14"></path>

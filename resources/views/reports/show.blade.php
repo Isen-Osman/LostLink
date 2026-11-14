@@ -14,6 +14,15 @@
         @auth
             @if (auth()->id() === $report->user_id)
                 <div class="flex items-center gap-2">
+                    <form action="{{ route('reports.resolve', $report) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        @if ($report->status === \App\Enums\ReportStatus::Resolved)
+                            <button class="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-white px-3 py-1.5 text-sm font-semibold text-amber-700 shadow-sm transition hover:bg-amber-50" type="submit">Врати во отворена</button>
+                        @else
+                            <button class="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50" type="submit">Означи како решена</button>
+                        @endif
+                    </form>
                     <a href="{{ route('reports.edit', $report) }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M12 20h9"></path>
@@ -78,7 +87,7 @@
                         </div>
                         <div class="flex items-center justify-between gap-4">
                             <dt class="text-slate-500">Статус</dt>
-                            <dd class="font-medium text-slate-900">{{ $report->status === 'resolved' ? 'Решена' : 'Отворена' }}</dd>
+                            <dd class="font-medium text-slate-900">{{ $report->status->label() }}</dd>
                         </div>
                     </dl>
                 </div>

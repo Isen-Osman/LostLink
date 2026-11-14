@@ -39,8 +39,9 @@
                 <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="type">Тип</label>
                 <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30" id="type" name="type">
                     <option value="">Сите</option>
-                    <option value="lost" @selected(request('type') === 'lost')>Изгубен</option>
-                    <option value="found" @selected(request('type') === 'found')>Најден</option>
+                    @foreach (\App\Enums\ReportType::cases() as $type)
+                        <option value="{{ $type->value }}" @selected(request('type') === $type->value)>{{ $type->label() }}</option>
+                    @endforeach
                 </select>
             </div>
 
@@ -48,8 +49,8 @@
                 <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="category">Категорија</label>
                 <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30" id="category" name="category">
                     <option value="">Сите категории</option>
-                    @foreach (\App\Models\Report::CATEGORIES as $value => $label)
-                        <option value="{{ $value }}" @selected(request('category') === $value)>{{ $label }}</option>
+                    @foreach (\App\Enums\ReportCategory::cases() as $category)
+                        <option value="{{ $category->value }}" @selected(request('category') === $category->value)>{{ $category->label() }}</option>
                     @endforeach
                 </select>
             </div>
@@ -82,13 +83,24 @@
 
     <div class="mt-4 grid gap-4 sm:grid-cols-2">
         @forelse ($reports as $report)
-            <article class="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+            @php($resolved = $report->status === \App\Enums\ReportStatus::Resolved)
+            <article class="group flex flex-col rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md {{ $resolved ? 'border-slate-300 bg-slate-100' : 'border-slate-200 bg-white' }}">
                 @if ($report->image)
                     <img class="mb-4 h-40 w-full rounded-xl object-cover" src="{{ $report->imageUrl() }}" alt="{{ $report->title }}" loading="lazy">
                 @endif
 
                 <div class="flex items-center justify-between gap-3">
-                    <x-type-badge :type="$report->type" />
+                    <div class="flex items-center gap-2">
+                        <x-type-badge :type="$report->type" />
+                        @if ($resolved)
+                            <span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M20 6 9 17l-5-5"></path>
+                                </svg>
+                                Решена
+                            </span>
+                        @endif
+                    </div>
                     <time class="text-xs font-medium text-slate-500" datetime="{{ $report->happened_at->toDateString() }}">{{ $report->happened_at->format('d.m.Y') }}</time>
                 </div>
 
