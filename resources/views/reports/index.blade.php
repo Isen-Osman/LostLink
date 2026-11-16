@@ -55,9 +55,10 @@
                 </select>
             </div>
 
-            <div>
+            <div class="relative">
                 <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="location">Локација</label>
-                <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30" id="location" name="location" type="text" value="{{ request('location') }}" placeholder="Пр. Скопје">
+                <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30" id="location" name="location" type="text" value="{{ request('location') }}" placeholder="Пр. Скопје" autocomplete="off">
+                <ul class="absolute z-10 mt-1 hidden max-h-60 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg" id="location-suggestions"></ul>
             </div>
 
             <div>
@@ -159,4 +160,6 @@
             {{ $reports->links() }}
         </div>
     @endif
+
+    @include('reports.partials.location-autocomplete')
 @endsection

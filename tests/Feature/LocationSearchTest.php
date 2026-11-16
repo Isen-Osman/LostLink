@@ -38,13 +38,29 @@ it('returns an empty list for a short query', function () {
     Http::assertNothingSent();
 });
 
-it('redirects guests to the login page', function () {
-    $this->get('/locations?q=Partizanski')->assertRedirect(route('login'));
+it('lets guests search locations for the public filter', function () {
+    Http::fake([
+        'api.geoapify.com/*' => Http::response([
+            'features' => [
+                ['properties' => ['formatted' => 'Skopje, North Macedonia']],
+            ],
+        ]),
+    ]);
+
+    $this->getJson('/locations?q=Skopje')
+        ->assertOk()
+        ->assertJsonPath('data.0.label', 'Skopje, North Macedonia');
 });
 
 it('renders the location autocomplete input', function () {
     $this->actingAs(User::factory()->create())
         ->get('/reports/create')
+        ->assertOk()
+        ->assertSee('location-suggestions', false);
+});
+
+it('renders the location autocomplete in the reports filter', function () {
+    $this->get('/reports')
         ->assertOk()
         ->assertSee('location-suggestions', false);
 });
