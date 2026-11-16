@@ -1,58 +1,226 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# LostLink
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+LostLink is a community lost & found platform built with Laravel. People report items they have lost or found, browse and filter nearby reports, and get in touch with the person who posted them. Reports can be marked as resolved once the item is returned, and every report is owned by the user who created it.
 
-## About Laravel
+The project is a full-stack Laravel application (Blade + Tailwind) with a token-authenticated JSON API, PostgreSQL storage, and Geoapify-powered location autocomplete. It is also the project I use to practise AI-assisted development with Laravel Boost, tests, and static tooling.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## What it solves
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Losing a wallet, phone, or set of keys usually ends up in scattered social media posts that disappear after a few days. LostLink keeps those reports in one place: structured by type, category, location, and date, searchable, and attributed to a real author with contact details.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Features
 
-## Learning Laravel
+- Session-based registration and login (name, email, phone, password).
+- Create, edit, and delete lost/found reports with an optional image.
+- Report types (`lost`, `found`), fixed category list, and open/resolved status.
+- Location autocomplete backed by the Geoapify geocoding API (Macedonia).
+- Filters for type, category, location, and date, with pagination.
+- "My reports" page for the authenticated user.
+- Authors can resolve/reopen their own reports.
+- Ownership-based authorization through a policy.
+- JSON API with Sanctum personal access tokens for mobile/partner clients.
+- Rate limiting on login, public API reads, authenticated writes, and location search.
+- PostgreSQL query indexes, including a trigram index for location search.
+- Database check constraints for enum-backed columns and transactional writes.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Demo
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+![LostLink demo](docs/demo.gif)
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Screenshots
 
-## Agentic Development
+| Reports list and filters | Report details |
+| --- | --- |
+| ![Reports list](docs/reports-index.png) | ![Report details](docs/report-details.png) |
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Tech stack
 
-```bash
-composer require laravel/boost --dev
+| Layer | Technology |
+| --- | --- |
+| Language | PHP 8.3+ (tested on 8.5) |
+| Framework | Laravel 13 |
+| Authentication | Session guard (web), Laravel Sanctum (API) |
+| Database | PostgreSQL (SQLite in-memory for tests) |
+| Frontend | Blade, Tailwind CSS 4, Vite 8 |
+| Testing | Pest 4 |
+| Code style | Laravel Pint |
+| External service | Geoapify Geocoding API |
 
-php artisan boost:install
+## Project structure
+
+```
+app/
+├── Enums/                  ReportType, ReportCategory, ReportStatus
+├── Http/
+│   ├── Controllers/        Web controllers (auth, reports, location search)
+│   │   └── Api/            Token-authenticated API controllers
+│   ├── Requests/           StoreReportRequest, UpdateReportRequest validation
+│   └── Resources/          ReportResource (API serialization)
+├── Models/                 User, Report
+├── Policies/               ReportPolicy (owner-only update/delete)
+└── Services/               GeoapifyService (location autocomplete + caching)
+database/
+├── factories/              UserFactory, ReportFactory
+├── migrations/             Schema, indexes, and check constraints
+└── seeders/                DatabaseSeeder
+resources/
+├── css/app.css             Tailwind entry point
+└── views/
+    ├── auth/               Login and registration
+    ├── components/         Blade components (type badge)
+    ├── layouts/            App layout
+    └── reports/            Index, create, edit, show, my reports, partials
+routes/
+├── web.php                 Session-based web routes
+├── api.php                 Sanctum-protected JSON API
+└── console.php             Console routes
+tests/
+├── Feature/                HTTP, API, authorization, and integration tests
+│   └── Api/
+└── Unit/                   Unit tests
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Data model
 
-## Contributing
+- `users` — name, email, phone, password.
+- `reports` — `user_id` (nullable, set null on delete), `type`, `category`, `title`, `description`, `location`, `happened_at`, `status`, optional `image`, timestamps.
+- `reports` also contains reserved `latitude`/`longitude` columns for future proximity filtering.
+- Enum-backed columns are constrained at the database level on PostgreSQL.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Images are stored on the `public` disk and exposed through `storage:link`.
 
-## Code of Conduct
+## Getting started
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Quick start
 
-## Security Vulnerabilities
+Clone the repository and start the whole application (PHP, PostgreSQL, and built assets) with one command:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+git clone https://github.com/Isen-Osman/LostLink.git && cd LostLink && docker compose up --build
+```
+
+Then open `http://localhost:8000`. Migrations run automatically on the first start. Requires Docker with Compose.
+
+### Requirements
+
+- PHP 8.3+ and Composer 2
+- Node.js 20.19+ (or 22.12+) and npm
+- PostgreSQL 14+ (the `pg_trgm` extension is used for location search)
+
+### Installation
+
+```bash
+git clone https://github.com/Isen-Osman/LostLink.git
+cd LostLink
+
+composer install
+cp .env.example .env
+php artisan key:generate
+
+# Configure PostgreSQL and the Geoapify key in .env (see below)
+php artisan migrate
+
+npm install
+npm run build
+```
+
+### Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `APP_URL` | Base URL of the application |
+| `DB_CONNECTION` | Set to `pgsql` for PostgreSQL |
+| `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | Database connection |
+| `GEOAPIFY_API_KEY` | Geoapify API key for location autocomplete |
+| `FILESYSTEM_DISK` | Default disk; report images use the `public` disk |
+
+Without `GEOAPIFY_API_KEY` the autocomplete returns no suggestions, but the location field still accepts free text.
+
+### Running locally
+
+```bash
+php artisan serve
+npm run dev
+```
+
+Or, as a single shortcut after the environment is configured:
+
+```bash
+composer run dev
+```
+
+### Running with Docker
+
+The repository ships a `Dockerfile` (PHP 8.5 + built assets) and a `docker-compose.yml` with PostgreSQL 17:
+
+```bash
+GEOAPIFY_API_KEY=your-key docker compose up --build
+```
+
+The application is served at `http://localhost:8000`. On startup the container waits for PostgreSQL, runs migrations, and creates the storage symlink. A named volume keeps uploaded images between restarts, and a second volume persists the database.
+
+Compose uses its own database container (`lostlink` / `secret` on the internal `db` host), so the database settings in your local `.env` are ignored. `GEOAPIFY_API_KEY` can also be provided through the root `.env`, since Compose reads it for variable substitution.
+
+## API
+
+The API lives under `/api`. Authentication uses Sanctum bearer tokens: call `POST /api/login`, then send `Authorization: Bearer <token>` on protected requests.
+
+| Method | Endpoint | Auth | Description |
+| --- | --- | --- | --- |
+| POST | `/api/login` | No | Exchange email/password for a token |
+| GET | `/api/reports` | No | Paginated reports; filters: `type`, `category`, `location`, `happened_at` |
+| GET | `/api/reports/{report}` | No | Single report |
+| POST | `/api/reports` | Yes | Create a report |
+| PUT/PATCH | `/api/reports/{report}` | Yes | Update a report (owner only) |
+| DELETE | `/api/reports/{report}` | Yes | Delete a report (owner only) |
+| GET | `/api/user` | Yes | Current user |
+| POST | `/api/logout` | Yes | Revoke the current token |
+
+Rate limits: 5 requests/minute for login, 60 requests/minute for the reports API, and 30 requests/minute for location search.
+
+### Web routes
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/` | Redirects to the reports list |
+| GET | `/reports` | Reports list with filters |
+| GET | `/reports/{report}` | Report details |
+| GET | `/reports/create` | Create form (auth) |
+| POST | `/reports` | Store a report (auth) |
+| GET | `/reports/{report}/edit` | Edit form (auth, owner) |
+| PUT | `/reports/{report}` | Update a report (auth, owner) |
+| PATCH | `/reports/{report}/resolve` | Toggle resolved status (auth, owner) |
+| DELETE | `/reports/{report}` | Delete a report (auth, owner) |
+| GET | `/my-reports` | Reports owned by the current user (auth) |
+| GET | `/locations` | JSON location suggestions (public, rate limited) |
+| GET/POST | `/login`, `/register`, `/logout` | Session authentication |
+
+## Testing and code style
+
+```bash
+php artisan test
+vendor/bin/pint
+```
+
+- Feature tests cover authentication, registration, report CRUD, authorization boundaries, API responses, and rate limiting.
+- The Geoapify service is tested with `Http::fake()`, so no external calls are made in tests.
+- Tests run against SQLite in-memory. PostgreSQL-specific migration logic (`pg_trgm` index and check constraints) is skipped on SQLite and should be verified against a PostgreSQL database.
+
+## Database notes
+
+- `reports` has a composite index on `(type, category)`, plus indexes on `category`, `happened_at`, and `user_id`.
+- `reports.location` uses a `pg_trgm` GIN index so `ILIKE '%term%'` searches stay fast.
+- Enum-backed columns (`type`, `category`, `status`) are protected by PostgreSQL check constraints.
+- Report creation and updates run inside `DB::transaction()`.
+
+## AI-assisted development
+
+This project is developed with AI coding agents as part of the workflow:
+
+- `AGENTS.md` and `.ai/rules` define the conventions agents must follow.
+- Laravel Boost provides MCP tools for schema, routes, logs, and version-specific documentation.
+- Tests and Pint act as guardrails: AI-generated changes are only accepted after the test suite and formatter pass.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT
