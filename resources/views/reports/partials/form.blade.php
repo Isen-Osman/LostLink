@@ -51,9 +51,10 @@
     </div>
 
     <div class="grid gap-5 sm:grid-cols-2">
-        <div>
+        <div class="relative">
             <label class="mb-1.5 block text-sm font-semibold text-slate-700" for="location">Локација</label>
-            <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30" id="location" name="location" type="text" value="{{ old('location', $report?->location) }}" placeholder="Каде е изгубен/најден?">
+            <input class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/30" id="location" name="location" type="text" value="{{ old('location', $report?->location) }}" placeholder="Каде е изгубен/најден?" autocomplete="off">
+            <ul class="absolute z-10 mt-1 hidden max-h-60 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg" id="location-suggestions"></ul>
         </div>
 
         <div>
@@ -67,3 +68,82 @@
         <a href="{{ $report ? route('reports.show', $report) : route('reports.index') }}" class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">Откажи</a>
     </div>
 </form>
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('location');
+            const list = document.getElementById('location-suggestions');
+
+            if (!input || !list) {
+                return;
+            }
+
+            const url = @json(route('locations.index', absolute: false));
+            let timer;
+
+            const hide = () => {
+                list.innerHTML = '';
+                list.classList.add('hidden');
+            };
+
+            const render = (suggestions) => {
+                list.innerHTML = '';
+
+                if (suggestions.length === 0) {
+                    hide();
+                    return;
+                }
+
+                suggestions.forEach(({ label }) => {
+                    const item = document.createElement('li');
+                    item.className = 'cursor-pointer px-3 py-2 text-sm text-slate-700 hover:bg-slate-100';
+                    item.textContent = label;
+                    item.addEventListener('click', () => {
+                        input.value = label;
+                        hide();
+                    });
+                    list.appendChild(item);
+                });
+
+                list.classList.remove('hidden');
+            };
+
+            input.addEventListener('input', () => {
+                clearTimeout(timer);
+                const query = input.value.trim();
+
+                if (query.length < 3) {
+                    hide();
+                    return;
+                }
+
+                timer = setTimeout(async () => {
+                    const response = await fetch(`${url}?q=${encodeURIComponent(query)}`, {
+                        headers: { Accept: 'application/json' },
+                    });
+
+                    if (!response.ok) {
+                        hide();
+                        return;
+                    }
+
+                    const { data } = await response.json();
+                    render(data);
+                }, 300);
+            });
+
+            input.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    hide();
+                }
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!input.contains(event.target) && !list.contains(event.target)) {
+                    hide();
+                }
+            });
+        });
+    </script>
+@endpush
