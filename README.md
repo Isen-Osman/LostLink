@@ -1,6 +1,6 @@
 # LostLink
 
-LostLink is a community lost & found platform built with Laravel. People report items they have lost or found, browse and filter nearby reports, and get in touch with the person who posted them. Reports can be marked as resolved once the item is returned, and every report is owned by the user who created it.
+LostLink is a community lost & found platform built with Laravel. People report items they have lost or found, browse and filter nearby reports, and get in touch with the person who posted them. Reports can be marked as resolved once the item is returned, and reports are attributed to their author (`user_id` is nullable and is set to null if that user is deleted).
 
 The project is a full-stack Laravel application (Blade + Tailwind) with a token-authenticated JSON API, PostgreSQL storage, and Geoapify-powered location autocomplete. It is also the project I use to practise AI-assisted development with Laravel Boost, tests, and static tooling.
 
@@ -25,7 +25,11 @@ Losing a wallet, phone, or set of keys usually ends up in scattered social media
 
 ## Demo
 
-![LostLink demo](docs/demo.gif)
+![LostLink demo](docs/LostLink.gif)
+
+Watch the project demonstration on YouTube:
+
+[▶ Watch Demo Video](https://www.youtube.com/watch?v=qBZ-2yhUj6M)
 
 ## Screenshots
 
@@ -84,7 +88,7 @@ tests/
 
 - `users` — name, email, phone, password.
 - `reports` — `user_id` (nullable, set null on delete), `type`, `category`, `title`, `description`, `location`, `happened_at`, `status`, optional `image`, timestamps.
-- `reports` also contains reserved `latitude`/`longitude` columns for future proximity filtering.
+- `reports` stores `location` as free text; there are no coordinate columns and proximity filtering is not implemented.
 - Enum-backed columns are constrained at the database level on PostgreSQL.
 
 Images are stored on the `public` disk and exposed through `storage:link`.
@@ -217,10 +221,6 @@ vendor/bin/pint
 
 This project is developed with AI coding agents as part of the workflow:
 
-- `AGENTS.md` and `.ai/rules` define the conventions agents must follow.
+- `AGENTS.md` and the skills in `.agents/skills` define the conventions and domain guidance agents must follow.
 - Laravel Boost provides MCP tools for schema, routes, logs, and version-specific documentation.
 - Tests and Pint act as guardrails: AI-generated changes are only accepted after the test suite and formatter pass.
-
-## License
-
-MIT
